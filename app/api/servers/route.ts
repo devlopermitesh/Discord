@@ -11,7 +11,7 @@ import { getIP } from '@/lib/ip'
 import { checkRateLimit } from '@/lib/limit'
 import { createServerLimiter, shouldCheckRateLimit } from '@/lib/rate-limit'
 import { getProfileCached } from '@/lib/get-profile'
-export const POST = asyncHandler(async (req: NextRequest) => {
+export const POST = asyncHandler(async (req: NextRequest, _context) => {
   const { userId } = await auth()
   const Bodydata = await req.json()
   const ip = await getIP()
