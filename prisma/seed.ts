@@ -1,8 +1,6 @@
 import { prisma } from '@/lib/prisma'
 
 async function main() {
-  await prisma.user.create({
-    data: { name: 'Test User', email: 'test@example.com' },
-  })
+  console.log('Nothing to Seed ✨✨🐈')
 }
 main().finally(async () => await prisma.$disconnect())
