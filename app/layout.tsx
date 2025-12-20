@@ -24,7 +24,12 @@ export default function RootLayout({
     <ClerkProvider>
       <ImageKitProvider>
         <html lang="en" suppressHydrationWarning>
-          <body className={cn(`${OpenSans.className}  antialiased`, 'bg-white dark:bg-[#313338]')}>
+          <body
+            className={cn(
+              `${OpenSans.className}  antialiased`,
+              'bg-Cbackground dark:bg-Cbackground'
+            )}
+          >
             <ThemeProvider
               attribute={'class'}
               storageKey="discord-theme"

@@ -1,9 +1,10 @@
+'use client'
 import { Tooltip } from 'react-tooltip'
 import { ButtonHTMLAttributes } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  icon: React.ElementType
+  icon?: React.ElementType
   tooltipText?: string
   size?: number
   tooltipId: string
@@ -31,7 +32,7 @@ const IconButton = ({
         data-tooltip-content={tooltipText} // Tooltip content
       >
         {children}
-        <Icon size={size} className="text-xl" />
+        {Icon && <Icon size={size} className="text-xl" />}
       </button>
 
       {/* Tooltip */}
