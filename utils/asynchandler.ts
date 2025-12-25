@@ -2,14 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ApiError } from './apierror'
 
 /**
- * Type for async route handler function
- */
-type AsyncRouteHandler<T extends Record<string, string> = Record<string, string>> = (
-  req: NextRequest,
-  context: { params: T }
-) => Promise<NextResponse>
-
-/**
  * Wraps async route handlers with error handling
  *
  * @param fn - The async route handler function
@@ -24,41 +16,39 @@ type AsyncRouteHandler<T extends Record<string, string> = Record<string, string>
 // Update your AsyncRouteHandler type definition
 // Make AsyncRouteHandler generic to accept specific param types
 
+type RouteContext<T extends Record<string, string> = Record<string, string>> = {
+  params: Promise<T>
+}
+
+type AsyncRouteHandler<T extends Record<string, string> = Record<string, string>> = (
+  req: NextRequest,
+  context?: { params: T } // Context ko optional bana diya
+) => Promise<NextResponse>
+
 export const asyncHandler = <T extends Record<string, string> = Record<string, string>>(
   fn: AsyncRouteHandler<T>
 ) => {
-  return async (req: NextRequest, context?: { params: Promise<T> | T }): Promise<NextResponse> => {
+  return async (
+    req: NextRequest,
+    context?: RouteContext<T> // Yahan bhi optional
+  ): Promise<NextResponse> => {
     try {
-      // Handle both Promise and non-Promise params, and undefined context
-      const resolvedParams = context?.params
-        ? context.params instanceof Promise
-          ? await context.params
-          : context.params
-        : ({} as T)
-
-      const resolvedContext = {
-        params: resolvedParams,
-      }
-
-      return (await fn(req, resolvedContext)) as NextResponse
+      // Agar context hai toh params resolve karo, nahi toh empty object
+      const params = context ? await context.params : ({} as T)
+      return await fn(req, { params })
     } catch (error) {
       console.error('Route handler error:', error)
 
-      // Handle different error types
       if (error instanceof ApiError) {
         return NextResponse.json(
           {
             success: false,
             error: error.message,
-            ...(process.env.NODE_ENV === 'development' && {
-              stack: error.stack,
-            }),
           },
           { status: 500 }
         )
       }
 
-      // Unknown error type
       return NextResponse.json(
         {
           success: false,

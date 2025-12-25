@@ -8,43 +8,45 @@ import { asyncHandler } from '@/utils/asynchandler'
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { v4 as uuid } from 'uuid'
-export const PATCH = asyncHandler(async (req: NextRequest, context) => {
-  const { params } = context
-  const { serverId } = params
-  const { userId } = await auth()
-  const ip = await getIP()
+export const PATCH = asyncHandler(
+  async (req: NextRequest, context?: { params: { serverId: string } }) => {
+    const params = context!.params
+    const { serverId } = params
+    const { userId } = await auth()
+    const ip = await getIP()
 
-  if (shouldCheckRateLimit() && (await checkRateLimit(updateServerInvitecodeLimiter, ip))) {
-    throw new RateLimitExceeded()
-  }
-
-  if (!userId) {
-    throw new UnauthorizedError('unauthorized for this request')
-  }
-
-  // ----- Cached profile -----
-  const profile = await getProfileCached(userId)
-  if (!profile) throw new UnauthorizedError()
-
-  const serverupdated = await prisma.server.update({
-    where: {
-      id: serverId,
-      profileId: profile.id,
-    },
-    data: {
-      inviteCode: uuid(),
-    },
-  })
-  if (!serverupdated) {
-    throw new InternalServerError()
-  }
-  return NextResponse.json(
-    {
-      success: true,
-      data: serverupdated,
-    },
-    {
-      status: 200,
+    if (shouldCheckRateLimit() && (await checkRateLimit(updateServerInvitecodeLimiter, ip))) {
+      throw new RateLimitExceeded()
     }
-  )
-})
+
+    if (!userId) {
+      throw new UnauthorizedError('unauthorized for this request')
+    }
+
+    // ----- Cached profile -----
+    const profile = await getProfileCached(userId)
+    if (!profile) throw new UnauthorizedError()
+
+    const serverupdated = await prisma.server.update({
+      where: {
+        id: serverId,
+        profileId: profile.id,
+      },
+      data: {
+        inviteCode: uuid(),
+      },
+    })
+    if (!serverupdated) {
+      throw new InternalServerError()
+    }
+    return NextResponse.json(
+      {
+        success: true,
+        data: serverupdated,
+      },
+      {
+        status: 200,
+      }
+    )
+  }
+)

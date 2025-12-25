@@ -14,77 +14,79 @@ import { asyncHandler } from '@/utils/asynchandler'
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-export const PATCH = asyncHandler(async (req: NextRequest, context) => {
-  const { params } = context
-  const { memberId } = params
-  const { role } = await req.json()
-  const { searchParams } = new URL(req.url)
-  const serverId = searchParams.get('serverId')
-  const { userId } = await auth()
-  const ip = await getIP()
+export const PATCH = asyncHandler(
+  async (req: NextRequest, context?: { params: { memberId: string } }) => {
+    const params = context!.params
+    const { memberId } = params
+    const { role } = await req.json()
+    const { searchParams } = new URL(req.url)
+    const serverId = searchParams.get('serverId')
+    const { userId } = await auth()
+    const ip = await getIP()
 
-  if (shouldCheckRateLimit() && (await checkRateLimit(rateLimitUpload, ip))) {
-    throw new RateLimitExceeded()
-  }
+    if (shouldCheckRateLimit() && (await checkRateLimit(rateLimitUpload, ip))) {
+      throw new RateLimitExceeded()
+    }
 
-  if (!userId) {
-    throw new UnauthorizedError('unauthorized for this request')
-  }
+    if (!userId) {
+      throw new UnauthorizedError('unauthorized for this request')
+    }
 
-  // ----- Cached profile -----
-  const profile = await getProfileCached(userId)
-  if (!profile) throw new UnauthorizedError()
+    // ----- Cached profile -----
+    const profile = await getProfileCached(userId)
+    if (!profile) throw new UnauthorizedError()
 
-  if (!serverId) throw new BadRequestError('Server id is missing')
-  if (!memberId) throw new BadRequestError('Member Id is missing')
-  //--------Verify data-----
-  if (!Object.values(Role).includes(role)) {
-    throw new BadRequestError('Invalid role')
-  }
-  //-------Update Operations--------
-  const updateserver = await prisma.server.update({
-    where: {
-      id: serverId,
-      profileId: {
-        not: memberId,
+    if (!serverId) throw new BadRequestError('Server id is missing')
+    if (!memberId) throw new BadRequestError('Member Id is missing')
+    //--------Verify data-----
+    if (!Object.values(Role).includes(role)) {
+      throw new BadRequestError('Invalid role')
+    }
+    //-------Update Operations--------
+    const updateserver = await prisma.server.update({
+      where: {
+        id: serverId,
+        profileId: {
+          not: memberId,
+        },
+        profile: {
+          id: profile.id,
+        },
       },
-      profile: {
-        id: profile.id,
-      },
-    },
-    data: {
-      members: {
-        update: {
-          where: {
-            id: memberId,
+      data: {
+        members: {
+          update: {
+            where: {
+              id: memberId,
+            },
+            data: {
+              role: role,
+            },
           },
-          data: {
-            role: role,
+        },
+      },
+      include: {
+        members: {
+          include: {
+            profile: true,
+          },
+          orderBy: {
+            role: 'asc',
           },
         },
       },
-    },
-    include: {
-      members: {
-        include: {
-          profile: true,
-        },
-        orderBy: {
-          role: 'asc',
-        },
-      },
-    },
-  })
-  console.log('updateserver', updateserver)
-  if (!updateserver) {
-    throw new InternalServerError()
+    })
+    console.log('updateserver', updateserver)
+    if (!updateserver) {
+      throw new InternalServerError()
+    }
+    return NextResponse.json({ success: true, data: updateserver }, { status: 200 })
   }
-  return NextResponse.json({ success: true, data: updateserver }, { status: 200 })
-})
+)
 
 export const DELETE = asyncHandler(
-  async (req: NextRequest, context: { params: { memberId: string } }) => {
-    const { params } = context
+  async (req: NextRequest, context?: { params: { memberId: string } }) => {
+    const params = context!.params
     const { memberId } = params
     const { searchParams } = new URL(req.url)
     const serverId = searchParams.get('serverId')
