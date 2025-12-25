@@ -1,11 +1,16 @@
 'use client'
 
+import { useModel } from '@/hooks/use-model'
 import { Plus } from 'lucide-react'
 
 export default function NavigationAction() {
+  const { onOpen } = useModel()
   return (
     <div>
-      <button className="group flex items-center">
+      <button
+        onClick={() => onOpen('createServer', { server: undefined })}
+        className="group flex items-center"
+      >
         {/* plus icon  */}
         <div
           className="

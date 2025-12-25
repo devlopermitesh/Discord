@@ -2,13 +2,7 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   Form,
   FormControl,
@@ -20,41 +14,56 @@ import {
 } from '@/components/ui/form'
 import { z } from 'zod'
 import { Input } from '@/components/ui/input'
-import UploadserverImage from '@/components/atoms/upload-serverImage'
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { createServerSchema } from '@/schema/server-schema'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useModel } from '@/hooks/use-model'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Type } from '@/lib/generated/prisma/enums'
+import { ENDPOINTS } from '@/config'
+import { createchannelSchema } from '@/schema/channel-schema'
+import queryString from 'query-string'
 
-const InitialModal = () => {
+const CreateChannelModal = () => {
   const [IsMounted, setIsMounted] = useState(false)
-  const { onClose } = useModel()
+  const { onClose, isOpen, modelType, data } = useModel()
   const router = useRouter()
+  const { server } = data
   useEffect(() => {
     setIsMounted(true)
   }, [])
-  const form = useForm<z.infer<typeof createServerSchema>>({
-    resolver: zodResolver(createServerSchema),
+  const form = useForm<z.infer<typeof createchannelSchema>>({
+    resolver: zodResolver(createchannelSchema),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       title: '',
-      description: '',
-      imageUrl: null,
+      type: Type.TEXT,
     },
   })
 
-  async function onSubmit(values: z.infer<typeof createServerSchema>) {
+  async function onSubmit(values: z.infer<typeof createchannelSchema>) {
     try {
-      await axios.post('/api/servers', values)
+      const query = queryString.stringifyUrl({
+        url: ENDPOINTS.createchannel,
+        query: { serverId: server?.id },
+      })
+      await axios.post(query, values)
 
       // Success handling
       form.reset()
       router.refresh()
       window.location.reload()
       onClose()
-      toast.success('Server created successfully!')
+      toast.success('channel created successfully!')
     } catch (error: unknown) {
       // Type guard for Axios errors
       if (axios.isAxiosError(error)) {
@@ -75,10 +84,10 @@ const InitialModal = () => {
 
   if (!IsMounted) return null
   return (
-    <Dialog open>
+    <Dialog open={isOpen && modelType === 'createchannel'}>
       <DialogContent
         className="
-    bg-white text-black 
+    bg-background text-primary
     overflow-y-auto 
     max-h-[90vh] 
     sm:max-h-[85vh] 
@@ -90,82 +99,55 @@ const InitialModal = () => {
       >
         <DialogHeader className="pb-4">
           <DialogTitle className="text-xl sm:text-2xl font-semibold tracking-tight">
-            Customize your Server
+            Create Channel
           </DialogTitle>
-
-          <DialogDescription className="text-sm text-muted-foreground">
-            Give your server a title and an image. You can always change it later.
-          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Image Upload */}
-            <FormField
-              control={form.control}
-              name="imageUrl"
-              render={({ field }) => (
-                <FormItem className="space-y-2">
-                  <FormLabel className="text-base font-medium">Server Image</FormLabel>
-
-                  <FormControl>
-                    <UploadserverImage currentUrl={field.value ?? null} onChange={field.onChange} />
-                  </FormControl>
-
-                  <FormDescription className="text-xs text-muted-foreground">
-                    Upload a cool icon for your server.
-                  </FormDescription>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             {/* Title */}
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel className="text-base font-medium">Title</FormLabel>
-
                   <FormControl>
                     <Input
-                      placeholder="Enter your server title"
+                      placeholder="Enter your channel name"
                       className="text-sm sm:text-base"
                       {...field}
                     />
                   </FormControl>
 
                   <FormDescription className="text-xs text-muted-foreground">
-                    This is your public server name.
+                    Channel name cant be general
                   </FormDescription>
-
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Description */}
             <FormField
               control={form.control}
-              name="description"
+              name="type"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel className="text-base font-medium">Description</FormLabel>
+                  <FormLabel className="text-base font-medium">Select Channel type</FormLabel>
 
                   <FormControl>
-                    <Input
-                      placeholder="Describe what your server is about"
-                      className="text-sm sm:text-base"
-                      {...field}
-                    />
+                    <Select defaultValue={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Theme" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.values(Type).map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type.toLowerCase()}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
-
-                  <FormDescription className="text-xs text-muted-foreground">
-                    Description is publicly visible on your server profile.
-                  </FormDescription>
-
                   <FormMessage />
                 </FormItem>
               )}
@@ -176,7 +158,7 @@ const InitialModal = () => {
               disabled={!form.formState.isValid}
               className="w-full bg-purple-600  hover:bg-purple-700 rounded-sm cursor-pointer"
             >
-              Create
+              Create Channel
             </Button>
           </form>
         </Form>
@@ -185,4 +167,4 @@ const InitialModal = () => {
   )
 }
 
-export default InitialModal
+export default CreateChannelModal

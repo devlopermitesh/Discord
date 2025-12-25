@@ -1,5 +1,5 @@
 'use client'
-import { Tooltip } from 'react-tooltip'
+import { PlacesType, Tooltip } from 'react-tooltip'
 import { ButtonHTMLAttributes } from 'react'
 import { twMerge } from 'tailwind-merge'
 
@@ -7,6 +7,7 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: React.ElementType
   tooltipText?: string
   size?: number
+  side?: PlacesType
   tooltipId: string
   className?: string
   textclass?: string
@@ -17,6 +18,7 @@ const IconButton = ({
   tooltipText,
   tooltipId,
   size,
+  side = 'right-end',
   className,
   textclass,
   children,
@@ -37,7 +39,7 @@ const IconButton = ({
 
       {/* Tooltip */}
       {tooltipText !== null && tooltipText !== undefined && tooltipText !== '' && (
-        <Tooltip className={textclass} id={tooltipId} place="left" />
+        <Tooltip className={textclass} id={tooltipId} place={side} />
       )}
     </div>
   )

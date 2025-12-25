@@ -22,20 +22,19 @@ import { z } from 'zod'
 import { Input } from '@/components/ui/input'
 import UploadserverImage from '@/components/atoms/upload-serverImage'
 import { Button } from '@/components/ui/button'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { createServerSchema } from '@/schema/server-schema'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useModel } from '@/hooks/use-model'
+import { ENDPOINTS } from '@/config'
 
-const InitialModal = () => {
-  const [IsMounted, setIsMounted] = useState(false)
-  const { onClose } = useModel()
+const EditServerModal = () => {
+  const { isOpen, modelType, onClose, data } = useModel()
   const router = useRouter()
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
+  const { server } = data
+
   const form = useForm<z.infer<typeof createServerSchema>>({
     resolver: zodResolver(createServerSchema),
     defaultValues: {
@@ -44,17 +43,26 @@ const InitialModal = () => {
       imageUrl: null,
     },
   })
-
+  useEffect(() => {
+    if (server) {
+      form.setValue('title', server.title)
+      form.setValue('description', server.description)
+      form.setValue('imageUrl', server.imageUrl)
+    }
+  }, [server, form])
   async function onSubmit(values: z.infer<typeof createServerSchema>) {
     try {
-      await axios.post('/api/servers', values)
+      if (!server?.id) {
+        throw Error('Something went wrong!')
+      }
+      await axios.patch(ENDPOINTS.updateserver(server.id), values)
 
       // Success handling
       form.reset()
       router.refresh()
       window.location.reload()
-      onClose()
-      toast.success('Server created successfully!')
+
+      toast.success('Server updated successfully!')
     } catch (error: unknown) {
       // Type guard for Axios errors
       if (axios.isAxiosError(error)) {
@@ -72,10 +80,12 @@ const InitialModal = () => {
       }
     }
   }
-
-  if (!IsMounted) return null
+  const handleClose = () => {
+    form.reset()
+    onClose()
+  }
   return (
-    <Dialog open>
+    <Dialog open={isOpen && modelType == 'editserver'} onOpenChange={handleClose}>
       <DialogContent
         className="
     bg-white text-black 
@@ -176,7 +186,7 @@ const InitialModal = () => {
               disabled={!form.formState.isValid}
               className="w-full bg-purple-600  hover:bg-purple-700 rounded-sm cursor-pointer"
             >
-              Create
+              Save
             </Button>
           </form>
         </Form>
@@ -185,4 +195,4 @@ const InitialModal = () => {
   )
 }
 
-export default InitialModal
+export default EditServerModal

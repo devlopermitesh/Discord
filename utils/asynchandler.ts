@@ -4,10 +4,10 @@ import { ApiError } from './apierror'
 /**
  * Type for async route handler function
  */
-type AsyncRouteHandler = (
+type AsyncRouteHandler<T extends Record<string, string> = Record<string, string>> = (
   req: NextRequest,
-  context?: { params: Record<string, string> }
-) => Promise<NextResponse | Response>
+  context: { params: T }
+) => Promise<NextResponse>
 
 /**
  * Wraps async route handlers with error handling
@@ -21,15 +21,25 @@ type AsyncRouteHandler = (
  *   return NextResponse.json({ data });
  * });
  */
-export const asyncHandler = (fn: AsyncRouteHandler) => {
-  return async (
-    req: NextRequest,
-    context: { params: Promise<Record<string, string>> }
-  ): Promise<NextResponse> => {
+// Update your AsyncRouteHandler type definition
+// Make AsyncRouteHandler generic to accept specific param types
+
+export const asyncHandler = <T extends Record<string, string> = Record<string, string>>(
+  fn: AsyncRouteHandler<T>
+) => {
+  return async (req: NextRequest, context?: { params: Promise<T> | T }): Promise<NextResponse> => {
     try {
+      // Handle both Promise and non-Promise params, and undefined context
+      const resolvedParams = context?.params
+        ? context.params instanceof Promise
+          ? await context.params
+          : context.params
+        : ({} as T)
+
       const resolvedContext = {
-        params: await context.params,
+        params: resolvedParams,
       }
+
       return (await fn(req, resolvedContext)) as NextResponse
     } catch (error) {
       console.error('Route handler error:', error)

@@ -10,6 +10,12 @@ export const createServerLimiter = new Ratelimit({
   analytics: true,
   prefix: 'rl_newserver',
 })
+export const LeaveServerLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, '60 s'), // 5 request per minute
+  analytics: false,
+  prefix: 'rl_leaveserver',
+})
 
 export const rateLimitChat = new Ratelimit({
   redis,
@@ -27,6 +33,11 @@ export const rateLimitSearch = new Ratelimit({
   redis,
   limiter: Ratelimit.slidingWindow(10, '1 m'),
   prefix: 'rl_search',
+})
+export const updateServerInvitecodeLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(15, '1 d'),
+  prefix: 'rsil_code',
 })
 
 export function shouldCheckRateLimit(): boolean {

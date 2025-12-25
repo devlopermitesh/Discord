@@ -1,7 +1,14 @@
 import { prisma } from '@/lib/prisma'
 import { cacheGet, cacheSet } from '@/lib/cache'
+type Profile = {
+  id: string
+  userId: string
+  email: string
+  name: string
+  imageUrl: string | null
+}
 
-export async function getProfileCached(userId: string) {
+export async function getProfileCached(userId: string): Promise<Profile | null> {
   const key = `profile:${userId}`
 
   //  Check cache

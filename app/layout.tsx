@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider'
 import { cn } from '@/lib/utils'
 import ImageKitProvider from '@/components/providers/ImagekitProvider'
 import { Toaster } from '@/components/ui/sonner'
+import ModalProvider from '@/components/providers/ModalProvider'
 const OpenSans = Open_Sans({
   subsets: ['latin'],
 })
@@ -36,6 +37,7 @@ export default function RootLayout({
               enableSystem={true}
               defaultTheme="dark"
             >
+              <ModalProvider />
               <Toaster />
               {children}
             </ThemeProvider>

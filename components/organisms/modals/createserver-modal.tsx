@@ -22,20 +22,16 @@ import { z } from 'zod'
 import { Input } from '@/components/ui/input'
 import UploadserverImage from '@/components/atoms/upload-serverImage'
 import { Button } from '@/components/ui/button'
-import { useEffect, useState } from 'react'
 import { createServerSchema } from '@/schema/server-schema'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useModel } from '@/hooks/use-model'
 
-const InitialModal = () => {
-  const [IsMounted, setIsMounted] = useState(false)
-  const { onClose } = useModel()
+const CreateServerModal = () => {
+  const { isOpen, modelType, onClose } = useModel()
   const router = useRouter()
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
+
   const form = useForm<z.infer<typeof createServerSchema>>({
     resolver: zodResolver(createServerSchema),
     defaultValues: {
@@ -53,7 +49,7 @@ const InitialModal = () => {
       form.reset()
       router.refresh()
       window.location.reload()
-      onClose()
+
       toast.success('Server created successfully!')
     } catch (error: unknown) {
       // Type guard for Axios errors
@@ -72,10 +68,12 @@ const InitialModal = () => {
       }
     }
   }
-
-  if (!IsMounted) return null
+  const handleClose = () => {
+    form.reset()
+    onClose()
+  }
   return (
-    <Dialog open>
+    <Dialog open={isOpen && modelType == 'createServer'} onOpenChange={handleClose}>
       <DialogContent
         className="
     bg-white text-black 
@@ -185,4 +183,4 @@ const InitialModal = () => {
   )
 }
 
-export default InitialModal
+export default CreateServerModal

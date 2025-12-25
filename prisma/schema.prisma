@@ -19,14 +19,14 @@ datasource db {
 // ============================================================================
 
 /// User role within a server
-enum Role {
+ enum Role {
   GUEST
   ADMIN
   MOD
 }
 
 /// Channel communication type
-enum Type {
+ enum Type {
   TEXT
   AUDIO
   VIDEO

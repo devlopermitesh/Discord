@@ -35,11 +35,19 @@ const ServerItem: React.FC<ServerItemProps> = ({ server }) => {
           params.serverId !== server.id && 'group-hover:h-5'
         )}
       />
-      <Avatar>
-        <AvatarImage src={server.imageUrl ?? undefined} />
-        <AvatarFallback>
-          <div className="  bg-gray-300 group-hover:bg-(--nav-action-hover) rounded-md p-2 transition-all  duration-700">
-            <p className="font-semibold group-hover:text-white ">{getInitials(server.title)}</p>
+      <Avatar className="size-8 rounded-md">
+        <AvatarImage
+          src={server.imageUrl ?? undefined}
+          className={cn(
+            'rounded-full ',
+            params.serverId === server.id && 'aspect-square object-cover rounded-md'
+          )}
+        />
+        <AvatarFallback className="rounded-md">
+          <div className="bg-gray-300 group-hover:bg-[var(--nav-action-hover)] rounded-md p-2 transition-all duration-700 flex items-center justify-center size-full">
+            <p className="font-semibold text-lg group-hover:text-white">
+              {getInitials(server.title)}
+            </p>
           </div>
         </AvatarFallback>
       </Avatar>
