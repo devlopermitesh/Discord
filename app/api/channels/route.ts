@@ -12,7 +12,7 @@ import { auth } from '@clerk/nextjs/server'
 import { unauthorized } from 'next/navigation'
 import { NextRequest, NextResponse } from 'next/server'
 
-export const POST = asyncHandler(async (req: NextRequest) => {
+export const POST = asyncHandler(async (req: NextRequest, _context) => {
   const Bodydata = await req.json()
   const { searchParams } = new URL(req.url)
   const { userId } = await auth()
