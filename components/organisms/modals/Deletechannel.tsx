@@ -13,17 +13,21 @@ import { Input } from '@/components/ui/input'
 import { ENDPOINTS } from '@/config'
 import { api } from '@/config/api'
 import { useModel } from '@/hooks/use-model'
+import { Channel } from '@/lib/generated/prisma/client'
+import { serverwithprofilewithmembers } from '@/types'
 import { Loader2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
+import queryString from 'query-string'
 import { useEffect, useState } from 'react'
 
-const DeleteServerModel = () => {
+const DeleteChannelModel = () => {
   const { isOpen, modelType, onClose, data } = useModel()
   const [Servername, setServerName] = useState('')
   const [isValid, setisValid] = useState(false)
   const [processing, setprocessing] = useState(false)
-  const { server } = data
+  const { server, channel } = data as { server: serverwithprofilewithmembers; channel: Channel }
   const router = useRouter()
+  const params = useParams()
 
   const deleteserver = async () => {
     try {
@@ -33,12 +37,16 @@ const DeleteServerModel = () => {
       if (!serverId) {
         throw Error('cant process your request for now!')
       }
-      const response = await api.delete(ENDPOINTS.deleteserver(serverId))
+      const url = queryString.stringifyUrl({
+        url: ENDPOINTS.deletechannel(channel.id),
+        query: { serverId: serverId },
+      })
+      const response = await api.delete(url)
       if (!response) {
         throw Error('something went wrong try again')
       }
       console.log('Response', response)
-      router.push('/')
+      router.push(`/servers/${server.id}`)
       router.refresh()
     } catch (error) {
       console.log(error)
@@ -46,17 +54,18 @@ const DeleteServerModel = () => {
       setServerName('')
       setisValid(false)
       setprocessing(false)
+      onClose()
     }
   }
   useEffect(() => {
-    if (Servername === server?.title) {
+    if (Servername === 'DELETE CHANNEL') {
       setisValid(true)
     } else {
       setisValid(false)
     }
   }, [Servername, server?.title, isValid])
   return (
-    <Dialog open={isOpen && modelType == 'deleteserver'} onOpenChange={onClose}>
+    <Dialog open={isOpen && modelType == 'deletechannel'} onOpenChange={onClose}>
       <DialogContent
         className="
     bg-background text-primary
@@ -71,17 +80,15 @@ const DeleteServerModel = () => {
       >
         <DialogHeader className="pb-4">
           <DialogTitle className="text-xl sm:text-2xl font-semibold tracking-tight">
-            Delete Server
+            Delete Channel
           </DialogTitle>
 
           <DialogDescription className="text-sm text-muted-foreground">
-            If you delete server all the channels will be gone and chats too
+            If you delete Channel all the chats and messages will be Delete too
           </DialogDescription>
         </DialogHeader>
 
-        <p className={'text-muted-foreground text-sm'}>
-          Enter server name `{server?.title}` for delete
-        </p>
+        <p className={'text-muted-foreground text-sm'}>Enter `DELETE CHANNEL` for delete</p>
         <Input
           className="flex w-full"
           value={Servername}
@@ -104,4 +111,4 @@ const DeleteServerModel = () => {
   )
 }
 
-export default DeleteServerModel
+export default DeleteChannelModel

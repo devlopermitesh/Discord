@@ -33,7 +33,6 @@ const ServerHeader: React.FC<ServerHeaderProps> = ({ server, role }) => {
 
   const isAdmin = role === Role.ADMIN
   const isModerator = isAdmin || role == Role.MOD
-  console.log('IsModerator', isModerator)
   return (
     <div className="flex flex-row border rounded-md justify-around p-2 ">
       <DropdownMenu open={opendrop} onOpenChange={() => setdrop((props) => !props)}>

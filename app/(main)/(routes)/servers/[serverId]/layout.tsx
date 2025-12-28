@@ -32,7 +32,7 @@ const Layout = async ({ children, params }: LayoutProp) => {
   }
   return (
     <div className=" h-full">
-      <div className="flex flex-col inset-y-0 fixed w-60 z-20 h-full">
+      <div className="hidden md:flex flex-col inset-y-0 fixed w-60 z-20 h-full">
         <ChannelSidebar serverId={server.id} />
       </div>
       <main className="h-full md:pl-60">{children}</main>

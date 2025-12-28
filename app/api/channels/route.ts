@@ -37,29 +37,25 @@ export const POST = asyncHandler(async (req: NextRequest, _context) => {
   const data = validateOrThrow(createchannelSchema, Bodydata)
 
   //---------check role--------
-  const isserverAdmin = await prisma.server.findFirst({
+  const member = await prisma.member.findFirst({
     where: {
-      OR: [
-        { profileId: profile.id, id: serverId },
-        {
-          members: {
-            some: {
-              AND: [{ profileId: profile.id }, { role: Role.MOD }],
-            },
-          },
-        },
-      ],
+      serverId,
+      profileId: profile.id,
+      role: {
+        in: [Role.ADMIN, Role.MOD], // Admin ya Moderator allowed
+      },
     },
   })
-  if (!isserverAdmin) {
-    throw new UnauthorizedError('unauthrorized request :user not authroized to create channel')
+
+  if (!member) {
+    throw new UnauthorizedError('Unauthorized: User not authorized to create channel')
   }
 
   //create channel
   const newchannel = await prisma.channel.create({
     data: {
       title: data.title,
-      serverId: isserverAdmin.id,
+      serverId: serverId,
       profileId: profile.id,
       type: data.type,
     },

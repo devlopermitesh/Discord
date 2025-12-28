@@ -7,4 +7,6 @@ export const ENDPOINTS = {
   kickoutuser: (memberId: string) => `/api/members/${memberId}`,
   createchannel: `/api/channels`,
   leaveserver: (serverId: string) => `/api/servers/${serverId}/leave`,
+  deletechannel: (channelId: string) => `/api/channels/${channelId}`,
+  editchannel: (channelId: string) => `/api/channels/${channelId}`,
 }

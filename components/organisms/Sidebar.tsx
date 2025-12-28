@@ -8,8 +8,6 @@ import ActionTooltip from '../molecular/action-tooltip'
 import { Separator } from '../ui/separator'
 import { ScrollArea } from '../ui/scroll-area'
 import ServerItem from '../molecular/ServerItem'
-import IconButton from '../atoms/IconButton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { CustomTooltip } from '../molecular/icon-tooltip'
 import { ModeToggle } from '../ui/mode-toggle'
 

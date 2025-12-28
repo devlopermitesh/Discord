@@ -8,3 +8,4 @@ export const createchannelSchema = z.object({
     .refine((name) => name !== 'general', { message: 'Name cant be general' }),
   type: z.enum(Type),
 })
+export const updatechannelSchema = createchannelSchema.partial()

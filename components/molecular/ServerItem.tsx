@@ -25,7 +25,10 @@ const ServerItem: React.FC<ServerItemProps> = ({ server }) => {
   }
   return (
     <div
-      onClick={() => router.push(`/servers/${server.id}`)}
+      onClick={() => {
+        router.push(`/servers/${server.id}`)
+        router.refresh()
+      }}
       className="group  flex items-center cursor-pointer"
     >
       <div

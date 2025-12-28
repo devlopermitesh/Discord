@@ -17,7 +17,7 @@ const ManageUserModal = () => {
   const { isOpen, modelType, onClose, data } = useModel()
   const serverdata = data as { server: serverwithprofilewithmembers }
   const server = serverdata?.server
-
+  if (modelType !== 'manageserveruser') return null
   return (
     <Dialog open={isOpen && modelType == 'manageserveruser'} onOpenChange={onClose}>
       <DialogContent

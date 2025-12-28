@@ -85,11 +85,16 @@ model Member {
   serverId  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  messages Message[]
+  DirectMessages DirectMessage[]
+  conversationsInitiated Conversation[] @relation("MemberOne")
+  conversationsReceived Conversation[] @relation("MemberTwo")
+
 
   // Relations
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
   server  Server  @relation(fields: [serverId], references: [id], onDelete: Cascade)
-
+ 
   @@map("members")
   @@unique([profileId, serverId])
   @@index([profileId])
@@ -105,6 +110,7 @@ model Channel {
   serverId  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  messages Message[]
 
   // Relations
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
@@ -113,4 +119,48 @@ model Channel {
   @@map("channels")
   @@index([profileId])
   @@index([serverId])
+}
+
+model Message{
+  id String @id @default(cuid())
+  content String @db.Text
+  memberId String @db.Text
+  member Member @relation(fields: [memberId],references: [id],onDelete:Cascade )
+  channelId String @db.Text
+  channel Channel @relation(fields: [channelId],references: [id],onDelete:Cascade )
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deleted Boolean @default(false)
+
+  @@index([channelId])
+  @@index([memberId])
+}
+
+model Conversation{
+  id String @id @default(uuid())
+  memberOneId String
+  MemberOne Member @relation("MemberOne",fields: [memberOneId],references: [id],onDelete: Cascade)
+  memberTwoId String
+  MemberTwo Member @relation("MemberTwo",fields: [memberTwoId],references: [id],onDelete: Cascade)
+  DirectMessages DirectMessage[]
+
+@@index([memberOneId])
+@@index([memberTwoId])
+@@unique([memberOneId,memberTwoId])
+
+}
+
+model DirectMessage{
+  id String @id @default(uuid())
+  content String @db.Text
+  fileUrl String? @db.Text
+  memberId String
+  member Member @relation(fields: [memberId],references: [id],onDelete: Cascade)
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId],references: [id],onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([conversationId])
+  
+
 }

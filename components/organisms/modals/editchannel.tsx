@@ -32,11 +32,11 @@ import { ENDPOINTS } from '@/config'
 import { createchannelSchema } from '@/schema/channel-schema'
 import queryString from 'query-string'
 
-const CreateChannelModal = () => {
+const EditChannelModel = () => {
   const [IsMounted, setIsMounted] = useState(false)
   const { onClose, isOpen, modelType, data } = useModel()
   const router = useRouter()
-  const { server } = data
+  const { server, channel } = data
   useEffect(() => {
     setIsMounted(true)
   }, [])
@@ -45,25 +45,28 @@ const CreateChannelModal = () => {
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
-      title: '',
-      type: Type.TEXT,
+      title: channel?.title,
+      type: channel?.type,
     },
   })
 
   async function onSubmit(values: z.infer<typeof createchannelSchema>) {
     try {
+      if (!channel) {
+        throw Error('Channel Id is not correct!')
+      }
       const query = queryString.stringifyUrl({
-        url: ENDPOINTS.createchannel,
+        url: ENDPOINTS.editchannel(channel.id),
         query: { serverId: server?.id },
       })
-      await axios.post(query, values)
+      await axios.patch(query, values)
 
       // Success handling
       form.reset()
       router.refresh()
       window.location.reload()
       onClose()
-      toast.success('channel created successfully!')
+      toast.success('channel update successfully!')
     } catch (error: unknown) {
       // Type guard for Axios errors
       if (axios.isAxiosError(error)) {
@@ -84,7 +87,7 @@ const CreateChannelModal = () => {
 
   if (!IsMounted) return null
   return (
-    <Dialog open={isOpen && modelType === 'createchannel'} onOpenChange={(open) => onClose()}>
+    <Dialog open={isOpen && modelType === 'editchannel'} onOpenChange={(open) => onClose()}>
       <DialogContent
         className="
     bg-background text-primary
@@ -167,4 +170,4 @@ const CreateChannelModal = () => {
   )
 }
 
-export default CreateChannelModal
+export default EditChannelModel

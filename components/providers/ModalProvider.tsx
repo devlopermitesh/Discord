@@ -8,6 +8,8 @@ import { useModel } from '@/hooks/use-model'
 import CreateChannelModal from '../organisms/modals/createchannel'
 import LeaveServerModal from '../organisms/modals/leaveserver'
 import DeleteServerModel from '../organisms/modals/Deleteserver'
+import DeleteChannelModel from '../organisms/modals/Deletechannel'
+import EditChannelModel from '../organisms/modals/editchannel'
 
 const ModalProvider = () => {
   const { modelType } = useModel()
@@ -26,6 +28,8 @@ const ModalProvider = () => {
       <CreateChannelModal />
       <LeaveServerModal />
       <DeleteServerModel />
+      <DeleteChannelModel />
+      <EditChannelModel />
     </>
   )
 }

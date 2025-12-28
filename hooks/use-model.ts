@@ -1,6 +1,6 @@
-import { Server } from '@/lib/generated/prisma/client'
+import { Channel, Server } from '@/lib/generated/prisma/client'
 import { create } from 'zustand'
-type ModelType =
+export type ModelType =
   | 'createServer'
   | 'inviteserver'
   | 'editserver'
@@ -8,8 +8,11 @@ type ModelType =
   | 'createchannel'
   | 'leaveserver'
   | 'deleteserver'
+  | 'deletechannel'
+  | 'editchannel'
 type Modeldata = {
   server?: Server
+  channel?: Channel
 }
 interface UseModelProps {
   modelType: ModelType | null
